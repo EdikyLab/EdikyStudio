@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
@@ -11,15 +10,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        qt: [6.6.3]
+        include:
+          - os: ubuntu-latest
+            qt: 6.6.3
+            qt_arch: linux_gcc_64
+          - os: macos-14
+            qt: 6.6.3
+            qt_arch: macos
+          - os: windows-latest
+            qt: 6.6.3
+            qt_arch: win64_msvc2022_64
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: hendrikmuhs/ccache-action@v1.2
+      - uses: seanmiddleditch/gha-setup-ninja@v4
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ccache-${{ matrix.os }}-qt${{ matrix.qt }}
 
@@ -27,13 +37,14 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt }}
+          arch: ${{ matrix.qt_arch }}
           modules: |
             qt5compat
             qtimageformats
             qtmultimedia
 
       - name: macOS deps
-        if: matrix.os == 'macos-latest'
+        if: startsWith(matrix.os, 'macos')
         run: brew install ccache || true
 
       - name: Linux deps
