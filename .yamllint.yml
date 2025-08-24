@@ -9,7 +9,7 @@ rules:
     present: false
   truthy:
     check-keys: false
-  braces: disable 
+  braces: disable
 
 # Optional: ignore paths (uncomment or add more if needed)
 # ignore: |
