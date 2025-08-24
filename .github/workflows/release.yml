@@ -29,6 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: seanmiddleditch/gha-setup-ninja@v4
+
       - uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt }}
@@ -37,6 +38,14 @@ jobs:
             qt5compat
             qtimageformats
             qtmultimedia
+
+      - name: Skip if no CMake project
+        shell: bash
+        run: |
+          if [ ! -f CMakeLists.txt ]; then
+            echo "No CMakeLists.txt. Nothing to release."
+            exit 0
+          fi
 
       - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build -j
