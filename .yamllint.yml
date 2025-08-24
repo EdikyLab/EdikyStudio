@@ -1,0 +1,17 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 140
+    level: warning
+  document-start:
+    present: false
+  truthy:
+    check-keys: false
+
+# Optional: ignore paths (uncomment or add more if needed)
+# ignore: |
+#   node_modules/
+#   vendor/
+#   .github/actions/**/dist/**
