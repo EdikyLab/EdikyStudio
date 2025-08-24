@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -34,10 +34,7 @@ jobs:
         with:
           version: ${{ matrix.qt }}
           arch: ${{ matrix.qt_arch }}
-          modules: |
-            qt5compat
-            qtimageformats
-            qtmultimedia
+          modules: "qt5compat qtimageformats qtmultimedia"
 
       - name: Skip if no CMake project
         shell: bash

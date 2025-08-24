@@ -13,12 +13,9 @@ jobs:
 
       - uses: jurplel/install-qt-action@v3
         with:
-          version: '6.6.3'
+          version: "6.6.3"
           arch: linux_gcc_64
-          modules: |
-            qt5compat
-            qtimageformats
-            qtmultimedia
+          modules: "qt5compat qtimageformats qtmultimedia"
 
       - name: Skip if no CMake project
         shell: bash
