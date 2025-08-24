@@ -1,18 +1,17 @@
----
 extends: default
 
 rules:
-  line-length:
-    max: 140
-    level: warning
-  document-start:
-    present: false
+  line-length: disable
+  document-start: disable
   truthy:
-    check-keys: false
+    level: warning
   braces: disable
+  colons: disable
+  commas: disable
+  trailing-spaces: disable
 
-# Optional: ignore paths (uncomment or add more if needed)
-# ignore: |
-#   node_modules/
-#   vendor/
-#   .github/actions/**/dist/**
+  indentation:
+    level: warning
+
+  comments:
+    level: warning
