@@ -1,61 +1,27 @@
 name: CI
-
 on:
   push: { branches: [main] }
   pull_request:
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Linux
-          - os: ubuntu-latest
-            qt_version: 6.6.3
-            qt_arch: linux_gcc_64
-            qt_modules: "qt5compat qtimageformats qtmultimedia"  # OK on Linux
-          # macOS (Apple Silicon)
-          - os: macos-14
-            qt_version: 6.6.3
-            qt_arch: macos
-            qt_modules: ""   # <-- IMPORTANT: no modules on mac to avoid aqt XML parse error
-          # Windows
-          - os: windows-latest
-            qt_version: 6.6.3
-            qt_arch: win64_msvc2022_64
-            qt_modules: "qt5compat qtimageformats qtmultimedia"  # OK on Windows
-
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: seanmiddleditch/gha-setup-ninja@v4
-
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ccache-${{ matrix.os }}-qt${{ matrix.qt_version }}
-
-      # Optional: newer aqt is a bit more forgiving with metadata
-      - name: Install Qt ${{ matrix.qt_version }}
-        uses: jurplel/install-qt-action@v3
-        with:
-          aqtversion: '==3.2.2'
-          version: ${{ matrix.qt_version }}
-          arch: ${{ matrix.qt_arch }}
-          # Only pass modules when we actually have them (Linux/Windows). Empty value on mac.
-          modules: ${{ matrix.qt_modules }}
-          # (Optional) cache downloads between runs
-          cache: true
-
-      - name: macOS deps
-        if: startsWith(matrix.os, 'macos')
-        run: brew install ccache || true
 
       - name: Linux deps
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y ccache
+
+      - name: macOS deps
+        if: startsWith(matrix.os, 'macos')
+        run: brew install ccache || true
 
       - name: Skip if no CMake project
         shell: bash
@@ -65,14 +31,9 @@ jobs:
             exit 0
           fi
 
-      - name: Configure (CMake)
-        run: |
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build -j
-
-      - name: Test (ctest)
+      - name: Test
         run: ctest --test-dir build --output-on-failure || true
