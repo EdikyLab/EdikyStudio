@@ -10,15 +10,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Linux
           - os: ubuntu-latest
-            qt: 6.6.3
+            qt_version: 6.6.3
             qt_arch: linux_gcc_64
-          - os: macos-14              # Apple Silicon runner
-            qt: 6.6.3
+            qt_modules: "qt5compat qtimageformats qtmultimedia"  # OK on Linux
+          # macOS (Apple Silicon)
+          - os: macos-14
+            qt_version: 6.6.3
             qt_arch: macos
+            qt_modules: ""   # <-- IMPORTANT: no modules on mac to avoid aqt XML parse error
+          # Windows
           - os: windows-latest
-            qt: 6.6.3
+            qt_version: 6.6.3
             qt_arch: win64_msvc2022_64
+            qt_modules: "qt5compat qtimageformats qtmultimedia"  # OK on Windows
 
     runs-on: ${{ matrix.os }}
 
@@ -29,14 +35,19 @@ jobs:
 
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ccache-${{ matrix.os }}-qt${{ matrix.qt }}
+          key: ccache-${{ matrix.os }}-qt${{ matrix.qt_version }}
 
-      # Install only the base Qt SDK. No extra modules.
-      - name: Install Qt ${{ matrix.qt }}
+      # Optional: newer aqt is a bit more forgiving with metadata
+      - name: Install Qt ${{ matrix.qt_version }}
         uses: jurplel/install-qt-action@v3
         with:
-          version: ${{ matrix.qt }}
+          aqtversion: '==3.2.2'
+          version: ${{ matrix.qt_version }}
           arch: ${{ matrix.qt_arch }}
+          # Only pass modules when we actually have them (Linux/Windows). Empty value on mac.
+          modules: ${{ matrix.qt_modules }}
+          # (Optional) cache downloads between runs
+          cache: true
 
       - name: macOS deps
         if: startsWith(matrix.os, 'macos')
