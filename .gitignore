@@ -1,0 +1,97 @@
+# -------------------------
+# OS / Editor / IDE files
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.user
+*.sdf
+*.suo
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# -------------------------
+# Build / Binary Artifacts
+# -------------------------
+build/
+bin/
+lib/
+obj/
+out/
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+
+# Ninja
+.ninja_deps
+.ninja_log
+
+# MSVC
+*.tlog
+*.pdb
+*.idb
+*.ilk
+
+# GCC/Clang
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# -------------------------
+# Generated / Temporary
+# -------------------------
+*.log
+*.tmp
+*.bak
+*.autosave
+*.depend
+*.rule
+*.stamp
+*.tags
+
+# -------------------------
+# Python (if bindings/scripts exist)
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# -------------------------
+# Node.js (if web/editor tools exist)
+# -------------------------
+node_modules/
+npm-debug.log
+yarn-error.log
