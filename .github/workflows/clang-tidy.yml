@@ -1,0 +1,26 @@
+name: Clang-Tidy
+
+on:
+  pull_request: {}
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Generate compile_commands.json
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cp build/compile_commands.json ./
+
+      - name: Run clang-tidy
+        run: |
+          FILES=$(git ls-files | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp)$' || true)
+          if [ -z "$FILES" ]; then
+            echo "No files"
+            exit 0
+          fi
+          clang-tidy $FILES --warnings-as-errors='*' --quiet || true
