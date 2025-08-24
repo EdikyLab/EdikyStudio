@@ -1,12 +1,13 @@
 # Ediky Video Editor | Phase-1 Layout
 
-This is a minimal skeleton project for building our editor using **Qt6 + CMake**. It sets up the basic UI layout so we can extend it feature by feature.
+This is a minimal skeleton project for building our editor using **Qt6 + CMake**.
+It sets up the basic UI layout so we can extend it feature by feature.
 
 ---
 
 ## Directory structure
 
-```
+```text
 ediky-video-editor/
 ├─ CMakeLists.txt
 ├─ cmake/
@@ -29,7 +30,7 @@ ediky-video-editor/
    └─ utils/
       ├─ Actions.h
       └─ Actions.cpp
-```
+````
 
 ---
 
@@ -53,14 +54,3 @@ cmake --build build -j
 ```
 
 On macOS, you can also open the generated `.app` bundle.
-
----
-
-## Next steps
-
-* Drag-and-drop import into Media Bin
-* Double-click item to preview
-* Add timeline clips model
-* Basic export using FFmpeg
-
-This project is intentionally minimal. Add features one by one to keep it manageable.
