@@ -1,24 +1,131 @@
-name: Format
+name: Format & Lint
 
 on:
   pull_request: {}
 
 jobs:
-  clang-format:
+  lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y clang-format
+        with:
+          fetch-depth: 0
 
-      - name: Check formatting
+      - name: Compute changed files
+        id: changes
         shell: bash
         run: |
           set -e
-          BASE_REF=${{ github.base_ref }}
-          git fetch origin "$BASE_REF":"refs/remotes/origin/$BASE_REF"
-          CHANGED=$(git diff --name-only "origin/$BASE_REF"... | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp)$' || true)
-          if [ -z "$CHANGED" ]; then
-            echo "No C/C++ changes."
-            exit 0
+          BASE_REF="${{ github.base_ref || 'main' }}"
+
+          git fetch --no-tags --prune --depth=1 origin "$BASE_REF":"refs/remotes/origin/$BASE_REF" || true
+
+          if git merge-base --is-ancestor "origin/$BASE_REF" HEAD 2>/dev/null; then
+            CHANGED=$(git diff --name-only "origin/$BASE_REF"...)
+          else
+            echo "No merge base found; using all tracked files."
+            CHANGED=$(git ls-files)
           fi
-          clang-format -n --Werror $CHANGED
+
+          echo "$CHANGED" | sed '/^$/d' > changed_all.txt
+          echo "Changed files:"
+          cat changed_all.txt || true
+
+          grep -Ei '\.(c|cc|cpp|cxx|h|hh|hpp)$'  changed_all.txt > changed_cpp.txt    || true
+          grep -Ei '\.cmake$|CMakeLists\.txt$'   changed_all.txt > changed_cmake.txt  || true
+          grep -Ei '\.ya?ml$'                     changed_all.txt > changed_yaml.txt   || true
+          grep -Ei '\.md$'                        changed_all.txt > changed_md.txt     || true
+          grep -Ei '\.py$'                        changed_all.txt > changed_py.txt     || true
+
+          touch changed_cpp.txt changed_cmake.txt changed_yaml.txt changed_md.txt changed_py.txt
+
+          echo "cpp_count=$(wc -l < changed_cpp.txt | tr -d ' ')"    >> $GITHUB_OUTPUT
+          echo "cmake_count=$(wc -l < changed_cmake.txt | tr -d ' ')" >> $GITHUB_OUTPUT
+          echo "yaml_count=$(wc -l < changed_yaml.txt | tr -d ' ')"   >> $GITHUB_OUTPUT
+          echo "md_count=$(wc -l < changed_md.txt | tr -d ' ')"       >> $GITHUB_OUTPUT
+          echo "py_count=$(wc -l < changed_py.txt | tr -d ' ')"       >> $GITHUB_OUTPUT
+
+      - name: Install clang-format
+        if: steps.changes.outputs.cpp_count != '0'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check C/C++ formatting (clang-format)
+        if: steps.changes.outputs.cpp_count != '0'
+        run: |
+          echo "Checking $(wc -l < changed_cpp.txt) C/C++ files..."
+          # -r = don't run if empty list
+          xargs -a changed_cpp.txt -r clang-format -n --Werror
+
+      - name: Set up Python
+        if: steps.changes.outputs.py_count != '0'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python linters
+        if: steps.changes.outputs.py_count != '0'
+        run: |
+          python -m pip install --upgrade pip
+          pip install black==24.10.0 flake8==7.1.1
+
+      - name: Check Python formatting (black)
+        if: steps.changes.outputs.py_count != '0'
+        run: |
+          echo "Checking $(wc -l < changed_py.txt) Python files with black..."
+          xargs -a changed_py.txt -r black --check --diff
+
+      - name: Lint Python (flake8)
+        if: steps.changes.outputs.py_count != '0'
+        run: flake8 .
+
+      - name: Install yamllint
+        if: steps.changes.outputs.yaml_count != '0'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+
+      - name: Lint YAML (yamllint)
+        if: steps.changes.outputs.yaml_count != '0'
+        run: |
+          echo "Checking $(wc -l < changed_yaml.txt) YAML files..."
+          xargs -a changed_yaml.txt -r yamllint -c .github/linters/yamllint.yml
+
+      - name: Install markdownlint-cli
+        if: steps.changes.outputs.md_count != '0'
+        run: sudo npm install -g markdownlint-cli
+
+      - name: Lint Markdown (markdownlint)
+        if: steps.changes.outputs.md_count != '0'
+        run: |
+          echo "Checking $(wc -l < changed_md.txt) Markdown files..."
+          xargs -a changed_md.txt -r markdownlint -c .github/linters/markdownlint.json
+
+      - name: Install cmake-format
+        if: steps.changes.outputs.cmake_count != '0'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install cmake-format (pip)
+        if: steps.changes.outputs.cmake_count != '0'
+        run: pip install cmakelang==0.6.13
+
+      - name: Check CMake formatting (cmake-format)
+        if: steps.changes.outputs.cmake_count != '0'
+        run: |
+          echo "Checking $(wc -l < changed_cmake.txt) CMake files..."
+          while read -r f; do
+            [ -z "$f" ] && continue
+            cmake-format --check "$f"
+          done < changed_cmake.txt
+
+      - name: Nothing to lint
+        if: |
+          steps.changes.outputs.cpp_count == '0' &&
+          steps.changes.outputs.py_count == '0'  &&
+          steps.changes.outputs.yaml_count == '0' &&
+          steps.changes.outputs.md_count == '0' &&
+          steps.changes.outputs.cmake_count == '0'
+        run: echo "No relevant files changed; skipping linters."
