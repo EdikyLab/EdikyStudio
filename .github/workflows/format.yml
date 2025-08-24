@@ -91,7 +91,7 @@ jobs:
         if: steps.changes.outputs.yaml_count != '0'
         run: |
           echo "Checking $(wc -l < changed_yaml.txt) YAML files..."
-          xargs -a changed_yaml.txt -r yamllint
+          xargs -a changed_yaml.txt -r yamllint -c .github/linters/yamllint.yml
 
       - name: Install markdownlint-cli
         if: steps.changes.outputs.md_count != '0'
@@ -101,7 +101,7 @@ jobs:
         if: steps.changes.outputs.md_count != '0'
         run: |
           echo "Checking $(wc -l < changed_md.txt) Markdown files..."
-          xargs -a changed_md.txt -r markdownlint
+          xargs -a changed_md.txt -r markdownlint -c .github/linters/markdownlint.json
 
       - name: Install cmake-format
         if: steps.changes.outputs.cmake_count != '0'
