@@ -2,7 +2,7 @@
 
 Briefly describe what this PR does and why.
 
-# Type
+## Type
 
 - [ ] Bug fix
 - [ ] Feature
@@ -10,24 +10,25 @@ Briefly describe what this PR does and why.
 - [ ] Docs
 - [ ] CI/Build
 
-# Changes
+## Changes
 
 - Bullet the key changes so reviewers can scan quickly.
 
-# Screenshots / Demos (if UI)
+## Screenshots / Demos (if UI)
 
 _Add images, GIFs, or a short clip._
 
-# How to Test
+## How to Test
 
 1. Steps to verify locally
 2. Expected result
 
-# Breaking Changes
+## Breaking Changes
 
-- [ ] None _If yes, describe migration steps._
+- [ ] None  
+_If yes, describe migration steps._
 
-# Checklist
+## Checklist
 
 - [ ] I ran locally and verified behavior
 - [ ] Added/updated tests (if applicable)
