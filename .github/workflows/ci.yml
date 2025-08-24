@@ -13,9 +13,9 @@ jobs:
           - os: ubuntu-latest
             qt: 6.6.3
             qt_arch: linux_gcc_64
-          - os: macos-14
+          - os: macos-14              # <-- must be macos-14 for Apple Silicon
             qt: 6.6.3
-            qt_arch: macos
+            qt_arch: macos            # <-- required arch
           - os: windows-latest
             qt: 6.6.3
             qt_arch: win64_msvc2022_64
@@ -34,7 +34,7 @@ jobs:
         with:
           version: ${{ matrix.qt }}
           arch: ${{ matrix.qt_arch }}
-          modules: "qt5compat qtimageformats qtmultimedia"
+          modules: "qt5compat qtimageformats qtmultimedia"   # one single line!
 
       - name: macOS deps
         if: startsWith(matrix.os, 'macos')
@@ -61,18 +61,5 @@ jobs:
       - name: Build
         run: cmake --build build -j
 
-      - name: Export compile_commands.json (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cmake -S . -B build-commands -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          cp build-commands/compile_commands.json ./
-
       - name: Test (ctest)
         run: ctest --test-dir build --output-on-failure || true
-
-      - name: Upload build dir on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.os }}
-          path: build
