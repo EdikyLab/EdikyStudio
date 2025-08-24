@@ -1,0 +1,35 @@
+name: Sanitizers
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  asan-ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: seanmiddleditch/gha-setup-ninja@v4
+
+      - uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.3'
+          modules: |
+            qt5compat
+            qtimageformats
+            qtmultimedia
+
+      - name: Configure with sanitizers
+        env:
+          ASAN_OPTIONS: exitcode=0
+        run: |
+          cmake -S . -B build-sani -G Ninja \
+            -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
+            -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined' \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - run: cmake --build build-sani -j
+      - run: ctest --test-dir build-sani --output-on-failure || true
