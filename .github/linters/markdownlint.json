@@ -1,18 +1,14 @@
 {
   "default": true,
-
   "MD013": false,
   "MD034": false,
   "MD041": false,
-
-  "MD029": { "style": "ordered" },
-  "MD046": { "style": "fenced" },
-
-  // keep spacing rules strict (these stay enabled by default):
-  // - MD022: blank lines around headings
-  // - MD032: blank lines around lists
-  // - MD031: blank lines around fenced code blocks
-  // - MD047: file ends with a single newline
-
-  "MD040": false
+  "MD029": {
+    "style": "ordered"
+  },
+  "MD046": {
+    "style": "fenced"
+  },
+  "MD040": false,
+  "MD004": false
 }
