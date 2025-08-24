@@ -2,15 +2,14 @@ name: CodeQL
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
   schedule:
-    - cron: '0 3 * * 1' # every Monday at 03:00 UTC
+    - cron: '0 3 * * 1'
 
 permissions:
-  security-events: write
   contents: read
+  security-events: write
 
 jobs:
   analyze:
@@ -22,7 +21,8 @@ jobs:
         with:
           languages: cpp
 
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - uses: seanmiddleditch/gha-setup-ninja@v4
+      - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build -j
 
       - uses: github/codeql-action/analyze@v3
