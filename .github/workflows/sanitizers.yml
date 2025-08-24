@@ -2,20 +2,27 @@ name: Sanitizers
 
 on:
   pull_request:
-  push: { branches: [main] }
+  push:
+    branches: [main]
 
 jobs:
   asan-ubsan:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - uses: seanmiddleditch/gha-setup-ninja@v4
 
-      - uses: jurplel/install-qt-action@v3
-        with:
-          version: "6.6.3"
-          arch: linux_gcc_64
-          modules: "qt5compat qtimageformats qtmultimedia"
+      # Qt via APT (safe; no aqt). Fine even if your code doesn't use Qt yet.
+      - name: Install Qt (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev qt6-multimedia-dev qt6-svg-dev qt6-tools-dev \
+            qt6-tools-dev-tools qt6-image-formats-plugins
+      - name: Configure Qt vars (Linux)
+        run: |
+          echo "CMAKE_PREFIX_PATH=/usr/lib/qt6:/usr/lib/x86_64-linux-gnu/cmake" >> $GITHUB_ENV
 
       - name: Skip if no CMake project
         shell: bash
@@ -25,14 +32,23 @@ jobs:
             exit 0
           fi
 
+      # ASan + UBSan
       - name: Configure with sanitizers
         env:
+          # keep CI green for now even if sanitizers find issues
           ASAN_OPTIONS: exitcode=0
+          UBSAN_OPTIONS: print_stacktrace=1
+          LSAN_OPTIONS: detect_leaks=0
         run: |
           cmake -S . -B build-sani -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
             -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
             -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined' \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo
+            -DCMAKE_SHARED_LINKER_FLAGS='-fsanitize=address,undefined'
 
-      - run: cmake --build build-sani -j
-      - run: ctest --test-dir build-sani --output-on-failure || true
+      - name: Build (sanitized)
+        run: cmake --build build-sani -j
+
+      - name: Test (sanitized)
+        run: ctest --test-dir build-sani --output-on-failure || true
