@@ -24,9 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: seanmiddleditch/gha-setup-ninja@v4
-
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ccache-${{ matrix.os }}-qt${{ matrix.qt }}
@@ -36,10 +34,7 @@ jobs:
         with:
           version: ${{ matrix.qt }}
           arch: ${{ matrix.qt_arch }}
-          modules: |
-            qt5compat
-            qtimageformats
-            qtmultimedia
+          modules: "qt5compat qtimageformats qtmultimedia"
 
       - name: macOS deps
         if: startsWith(matrix.os, 'macos')
