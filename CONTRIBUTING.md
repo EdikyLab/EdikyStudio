@@ -10,21 +10,21 @@ Please follow these guidelines to help keep the process smooth and productive.
 1. **Fork** the repository and clone it locally.
 2. Install dependencies:
 
-   ```bash
-   npm install
-````
+```bash
+npm install
+```
 
 3. Create a new branch for your work:
 
-   ```bash
-   git checkout -b <type>/<short-description>
-   ```
+```bash
+git checkout -b <type>/<short-description>
+```
 
-   Examples:
+Examples:
 
-   * `fix/timeline-scrubbing`
-   * `feat/video-export`
-   * `docs/update-readme`
+* `fix/timeline-scrubbing`
+* `feat/video-export`
+* `docs/update-readme`
 
 ---
 
@@ -33,18 +33,18 @@ Please follow these guidelines to help keep the process smooth and productive.
 * Use clear, descriptive commit messages.
 * Follow this style:
 
-  ```text
-  type: short description
-  ```
+```text
+type: short description
+```
 
-  **Types**:
+**Types**:
 
-  * `feat`: New feature
-  * `fix`: Bug fix
-  * `docs`: Documentation change
-  * `refactor`: Code improvement without feature change
-  * `test`: Adding/updating tests
-  * `chore`: Maintenance tasks
+* `feat`: New feature
+* `fix`: Bug fix
+* `docs`: Documentation change
+* `refactor`: Code improvement without feature change
+* `test`: Adding/updating tests
+* `chore`: Maintenance tasks
 
 Example:
 
