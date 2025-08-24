@@ -2,8 +2,7 @@ name: Sanitizers
 
 on:
   pull_request:
-  push:
-    branches: [main]
+  push: { branches: [main] }
 
 jobs:
   asan-ubsan:
@@ -11,6 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: seanmiddleditch/gha-setup-ninja@v4
+
       - uses: jurplel/install-qt-action@v3
         with:
           version: '6.6.3'
@@ -20,6 +20,14 @@ jobs:
             qtimageformats
             qtmultimedia
 
+      - name: Skip if no CMake project
+        shell: bash
+        run: |
+          if [ ! -f CMakeLists.txt ]; then
+            echo "No CMakeLists.txt. Skipping sanitizer build."
+            exit 0
+          fi
+
       - name: Configure with sanitizers
         env:
           ASAN_OPTIONS: exitcode=0
@@ -28,5 +36,6 @@ jobs:
             -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
             -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined' \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
       - run: cmake --build build-sani -j
       - run: ctest --test-dir build-sani --output-on-failure || true

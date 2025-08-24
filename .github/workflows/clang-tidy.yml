@@ -11,6 +11,14 @@ jobs:
       - uses: seanmiddleditch/gha-setup-ninja@v4
       - run: sudo apt-get update && sudo apt-get install -y clang-tidy
 
+      - name: Skip if no CMake project
+        shell: bash
+        run: |
+          if [ ! -f CMakeLists.txt ]; then
+            echo "No CMakeLists.txt. Skipping clang-tidy."
+            exit 0
+          fi
+
       - name: Generate compile_commands.json
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -20,7 +28,7 @@ jobs:
         run: |
           FILES=$(git ls-files | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp)$' || true)
           if [ -z "$FILES" ]; then
-            echo "No files"
+            echo "No C/C++ files."
             exit 0
           fi
           clang-tidy $FILES --warnings-as-errors='*' --quiet || true

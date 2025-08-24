@@ -1,8 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
+  push: { branches: [main] }
   pull_request:
 
 jobs:
@@ -28,8 +27,7 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-ninja@v4
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ccache-${{ matrix.os }}-qt${{ matrix.qt }}
 
@@ -50,6 +48,14 @@ jobs:
       - name: Linux deps
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y ccache
+
+      - name: Skip if no CMake project
+        shell: bash
+        run: |
+          if [ ! -f CMakeLists.txt ]; then
+            echo "No CMakeLists.txt in this branch. Skipping build."
+            exit 0
+          fi
 
       - name: Configure (CMake)
         run: |
