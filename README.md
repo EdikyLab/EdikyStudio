@@ -1,9 +1,9 @@
 # Ediky Video Editor | Phase-1 Layout
 
-This is a minimal skeleton project for building our editor using **Qt6 + CMake**.<br>
+This is a minimal skeleton project for building our editor using **Qt6 + CMake**.
 It sets up the basic UI layout so we can extend it feature by feature.
 
---------------------------------------------------------------------------------
+---
 
 ## Directory structure
 
@@ -30,20 +30,20 @@ ediky-video-editor/
    └─ utils/
       ├─ Actions.h
       └─ Actions.cpp
-```
+````
 
---------------------------------------------------------------------------------
+---
 
 ## Features in this starter
 
-- Menu bar (File, Edit, View, Help)
-- Toolbar (Import, Play/Pause, Step)
-- Media Bin dock (left)
-- Timeline dock (bottom)
-- Inspector dock (right)
-- Preview area (center) with QMediaPlayer + QVideoWidget
+* Menu bar (File, Edit, View, Help)
+* Toolbar (Import, Play/Pause, Step)
+* Media Bin dock (left)
+* Timeline dock (bottom)
+* Inspector dock (right)
+* Preview area (center) with QMediaPlayer + QVideoWidget
 
---------------------------------------------------------------------------------
+---
 
 ## Build & Run
 
