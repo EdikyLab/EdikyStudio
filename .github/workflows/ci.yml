@@ -13,9 +13,9 @@ jobs:
           - os: ubuntu-latest
             qt: 6.6.3
             qt_arch: linux_gcc_64
-          - os: macos-14              # <-- must be macos-14 for Apple Silicon
+          - os: macos-14              # must be 14 for Apple silicon
             qt: 6.6.3
-            qt_arch: macos            # <-- required arch
+            qt_arch: macos
           - os: windows-latest
             qt: 6.6.3
             qt_arch: win64_msvc2022_64
@@ -24,17 +24,49 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # Debug: show the workflow file content from the repo to ensure THIS file is running
+      - name: Debug - show ci.yml from repo
+        shell: bash
+        run: |
+          echo "Commit: $(git rev-parse --short HEAD)"
+          echo "----- .github/workflows/ci.yml -----"
+          sed -n '1,160p' .github/workflows/ci.yml || true
+          echo "------------------------------------"
+
       - uses: seanmiddleditch/gha-setup-ninja@v4
+
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ccache-${{ matrix.os }}-qt${{ matrix.qt }}
+
+      # Guard: fail fast if modules contains a newline
+      - name: Debug - verify modules string
+        shell: bash
+        run: |
+          MODULES="qt5compat qtimageformats qtmultimedia"
+          if printf "%s" "$MODULES" | grep -q $'\n'; then
+            echo "ERROR: modules contains newline"; exit 1
+          fi
+          echo "Modules OK: $MODULES"
+
+      # Optional: list available modules to prove arch is correct (per OS)
+      - name: Debug - list modules (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: python3 -m aqt list-qt linux desktop --modules ${{ matrix.qt }} linux_gcc_64
+      - name: Debug - list modules (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: python3 -m aqt list-qt mac desktop --modules ${{ matrix.qt }} macos
+      - name: Debug - list modules (Windows)
+        if: matrix.os == 'windows-latest'
+        run: py -3 -m aqt list-qt windows desktop --modules ${{ matrix.qt }} win64_msvc2022_64
 
       - name: Install Qt ${{ matrix.qt }}
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt }}
           arch: ${{ matrix.qt_arch }}
-          modules: "qt5compat qtimageformats qtmultimedia"   # one single line!
+          modules: "qt5compat qtimageformats qtmultimedia"   # ONE LINE
 
       - name: macOS deps
         if: startsWith(matrix.os, 'macos')
