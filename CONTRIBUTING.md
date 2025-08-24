@@ -7,14 +7,14 @@ Please follow these guidelines to help keep the process smooth and productive.
 
 ## 🛠 Getting Started
 
-1. **Fork** the repository and clone it locally.
-2. Install dependencies:
+- **Fork** the repository and clone it locally.
+- Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Create a new branch for your work:
+- Create a new branch for your work:
 
 ```bash
 git checkout -b <type>/<short-description>
