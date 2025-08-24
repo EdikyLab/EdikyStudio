@@ -15,26 +15,31 @@ jobs:
         shell: bash
         run: |
           set -e
-          BASE_REF="${{ github.base_ref }}"
-          git fetch --no-tags --prune --depth=1 origin "$BASE_REF":"refs/remotes/origin/$BASE_REF"
-          CHANGED=$(git diff --name-only "origin/$BASE_REF"...)
-          echo "$CHANGED" | sed '/^$/d' > changed_all.txt
-          echo "Changed files:"
-          cat changed_all.txt || true
+          BASE_REF="${{ github.base_ref || 'main' }}"
 
-          # Buckets
+          git fetch origin "$BASE_REF":"refs/remotes/origin/$BASE_REF"
+
+          if git merge-base --is-ancestor "origin/$BASE_REF" HEAD; then
+            CHANGED=$(git diff --name-only "origin/$BASE_REF"...)
+          else
+            echo "No merge base found, using all files."
+            CHANGED=$(git ls-files)
+          fi
+
+          echo "$CHANGED" | sed '/^$/d' > changed_all.txt
+          echo "Changed files:"; cat changed_all.txt || true
+
           grep -Ei '\.(c|cc|cpp|cxx|h|hh|hpp)$' changed_all.txt  || true > changed_cpp.txt
           grep -Ei '\.cmake$|CMakeLists\.txt$'   changed_all.txt  || true > changed_cmake.txt
           grep -Ei '\.ya?ml$'                    changed_all.txt  || true > changed_yaml.txt
           grep -Ei '\.md$'                       changed_all.txt  || true > changed_md.txt
           grep -Ei '\.py$'                       changed_all.txt  || true > changed_py.txt
 
-          # Export counts for conditionals
-          echo "cpp_count=$(wc -l < changed_cpp.txt | tr -d ' ')"       >> $GITHUB_OUTPUT
-          echo "cmake_count=$(wc -l < changed_cmake.txt | tr -d ' ')"    >> $GITHUB_OUTPUT
-          echo "yaml_count=$(wc -l < changed_yaml.txt | tr -d ' ')"      >> $GITHUB_OUTPUT
-          echo "md_count=$(wc -l < changed_md.txt | tr -d ' ')"          >> $GITHUB_OUTPUT
-          echo "py_count=$(wc -l < changed_py.txt | tr -d ' ')"          >> $GITHUB_OUTPUT
+          echo "cpp_count=$(wc -l < changed_cpp.txt | tr -d ' ')"    >> $GITHUB_OUTPUT
+          echo "cmake_count=$(wc -l < changed_cmake.txt | tr -d ' ')" >> $GITHUB_OUTPUT
+          echo "yaml_count=$(wc -l < changed_yaml.txt | tr -d ' ')"   >> $GITHUB_OUTPUT
+          echo "md_count=$(wc -l < changed_md.txt | tr -d ' ')"       >> $GITHUB_OUTPUT
+          echo "py_count=$(wc -l < changed_py.txt | tr -d ' ')"       >> $GITHUB_OUTPUT
 
       - name: Install clang-format
         if: steps.changes.outputs.cpp_count != '0'
