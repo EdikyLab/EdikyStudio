@@ -59,4 +59,4 @@ On macOS, you can also open the generated `.app` bundle.
 
 ## Contributors
 
-Developed by [@shyama7004](https://github.com/shyama7004) and [@Ayushi2234](https://github.com/Ayushi2234)
+Developed by [@shyama7004](https://github.com/shyama7004) and [@SleepyAyuu](https://github.com/SleepyAyuu)
